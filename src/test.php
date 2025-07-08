@@ -1,5 +1,5 @@
 <?php
-echo file_exists("clientes.php") ? "✅ clientes.php está disponible" : "❌ No se encuentra";
-echo "<br>";
-echo file_exists("token.json") ? "✅ token.json disponible" : "❌ token.json ausente";
+echo file_exists("clientes.php") ? "✅ clientes.php OK<br>" : "❌ Falta<br>";
+echo file_exists("token.json") ? "✅ token.json OK<br>" : "❌ Falta<br>";
+echo file_exists("Conexion2.php") ? "✅ Conexion2.php OK<br>" : "❌ Falta<br>";
 ?>
