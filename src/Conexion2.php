@@ -10,4 +10,6 @@ $conn = new mysqli($host, $usuario, $clave, $basedatos,3307);
 if ($conn->connect_error) {
   die("Error de conexión: " . $conn->connect_error);
 }
+echo "✅ Conexión exitosa a MariaDB en el puerto 3307";
 ?>
+echo "✅ Conexión exitosa a MariaDB en el puerto 3307";
