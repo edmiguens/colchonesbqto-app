@@ -34,7 +34,7 @@ if ($httpStatus !== 200) {
 }
 
 $data     = json_decode($response, true);
-$clientes = $data['QueryResponse']['Customer'] ?? [];\
+$clientes = $data['QueryResponse']['Customer'] ?? [];
 echo "<pre>" . print_r($clientes, true) . "</pre>";
 ?>
 <!DOCTYPE html>
