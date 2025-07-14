@@ -3,17 +3,16 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// ?? Verifica que el usuario esté logueado
+// 🔐 Verificación de sesión
 if (!isset($_SESSION["usuario"])) {
     header("Location: /ColchonesBqto/login.php");
     exit();
 }
 
-// ?? Archivo del token
+// 🔄 Cargar y renovar token
 $tokenFile = __DIR__ . '/../token.json';
 $tokenData = file_exists($tokenFile) ? json_decode(file_get_contents($tokenFile), true) : null;
 
-// ?? Renovar token si está cerca de expirar
 if ($tokenData && isset($tokenData['access_token'], $tokenData['realmId'], $tokenData['expires_in'])) {
     $expiraEn     = $tokenData['expires_in'];
     $guardadoHace = time() - filemtime($tokenFile);
@@ -27,7 +26,7 @@ if ($tokenData && isset($tokenData['access_token'], $tokenData['realmId'], $toke
     exit();
 }
 
-// ?? Extraer credenciales
+// 📦 Extraer credenciales
 $accessToken = $tokenData['access_token'];
 $realmId     = $tokenData['realmId'];
 $query       = urlencode("SELECT Id, DisplayName, Balance, PrimaryEmailAddr, PrimaryPhone FROM Customer");
@@ -47,7 +46,7 @@ $response   = curl_exec($ch);
 $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// ? Si hubo error en la consulta
+// ❌ Manejo de errores
 if ($response === false || $httpStatus !== 200) {
     echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
     <script>
@@ -69,7 +68,7 @@ $totalBalance = 0;
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard | Métricas de Clientes</title>
+  <title>Clientes | Detalle completo</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -77,14 +76,17 @@ $totalBalance = 0;
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">?? Dashboard</a>
-    <span class="navbar-text text-white">Usuario: <?= htmlspecialchars($_SESSION["usuario"]) ?></span>
+    <a class="navbar-brand" href="#">👥 Clientes</a>
+    <div class="d-flex ms-auto">
+      <a href="dashboard.php" class="btn btn-outline-light me-3">📅 Dashboard</a>
+      <span class="navbar-text text-white">Usuario: <?= htmlspecialchars($_SESSION["usuario"]) ?></span>
+    </div>
   </div>
 </nav>
 
 <div class="container py-4">
-  <h2 class="mb-4">?? Clientes registrados en QuickBooks</h2>
-  <a href="../src/exportar/exportar_clientes.php" class="btn btn-success mb-3">?? Exportar a Excel</a>
+  <h2 class="mb-4">📋 Clientes registrados en QuickBooks</h2>
+  <a href="../src/exportar/exportar_clientes.php" class="btn btn-success mb-3">⬇️ Exportar a Excel</a>
 
   <?php if (empty($clientes)): ?>
     <script>
@@ -123,10 +125,6 @@ $totalBalance = 0;
       </tfoot>
     </table>
   <?php endif; ?>
-
-  <div class="text-center mt-4">
-    <a href="clientes.php" class="btn btn-secondary">?? Ver Clientes Detallados</a>
-  </div>
 </div>
 </body>
 </html>

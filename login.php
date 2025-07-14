@@ -1,97 +1,74 @@
 <?php
 session_start();
-require_once 'conexion.php'; // Usa la conexión centralizada
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+require_once __DIR__ . '/src/Config/conexion.php';
 
-$mensaje = '';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $cedula = strtoupper(trim($_POST["cedula"] ?? ''));
+  $contrasena = trim($_POST["contrasena"] ?? '');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $cedula = strtoupper(trim($_POST["cedula"]));
-    if (!preg_match("/^V\d+$/", $cedula)) {
-        $cedula = "V" . preg_replace("/[^0-9]/", "", $cedula);
-    }
-
-    $clave = $_POST["password"];
-
-    $sql = "SELECT id, nombre, password, rol FROM usuarios WHERE cedula = ?";
-    $stmt = $conn->prepare($sql);
+  if (!preg_match('/^[VEJ]\d{7,10}$/', $cedula)) {
+    $error = "Cédula/RIF inválido. Debe comenzar con V, E o J y contener de 7 a 10 dígitos.";
+  } elseif ($contrasena === '') {
+    $error = "Debes ingresar la contraseña.";
+  } else {
+    $stmt = $conn->prepare("SELECT id, nombre, password, rol FROM usuarios WHERE cedula = ?");
     $stmt->bind_param("s", $cedula);
     $stmt->execute();
     $resultado = $stmt->get_result();
 
-    if ($resultado->num_rows > 0) {
-        $usuario = $resultado->fetch_assoc();
-        if (password_verify($clave, $usuario["password"])) {
-            $_SESSION["usuario"] = $usuario["nombre"];
-            $_SESSION["rol"] = $usuario["rol"];
-            $_SESSION["usuario_id"] = $usuario["id"];
-            header("Location: dashboard.php");
-            exit();
-        } else {
-            $mensaje = "⚠️ Contraseña incorrecta.";
-        }
+    if ($resultado->num_rows === 1) {
+      $fila = $resultado->fetch_assoc();
+      if (password_verify($contrasena, $fila["password"])) {
+        $_SESSION["usuario"] = $fila["nombre"];
+        $_SESSION["usuario_id"] = $fila["id"];
+        $_SESSION["rol"] = $fila["rol"];
+		header("Location: vistas/dashboard.php");
+        exit;
+      } else {
+        $error = "Contraseña incorrecta.";
+      }
     } else {
-		    $mensaje = "❌ Usuario no encontrado.";
+      $error = "Cédula no registrada.";
     }
+  }
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Colchones BQTO - Inicio de Sesión</title>
+  <title>Inicio de Sesión</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f2f2f2;
-    }
-    .login-card {
-      max-width: 400px;
-      margin: auto;
-      margin-top: 60px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .colchon-img {
-      width: 100%;
-      height: auto;
-      border-bottom: 3px solid #007bff;
-    }
-    .input-group-text {
-      background-color: #007bff;
-      color: white;
-      border: none;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+  <form method="POST" class="bg-white p-5 rounded shadow" style="width: 100%; max-width: 400px;">
+    <h2 class="mb-4 text-center">🔐 Iniciar Sesión</h2>
 
-<div class="card login-card">
-  <img src="img/colchon.jpg" alt="Colchón decorativo" class="colchon-img">
-  <div class="card-body">
-    <?php if ($mensaje): ?>
-      <div class='alert alert-warning text-center'><?= $mensaje ?></div>
-    <?php endif; ?>
-    <form method="POST">
-      <div class="mb-3">
-        <label class="form-label">Cédula:</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fas fa-user"></i></span>
-          <input type="text" name="cedula" class="form-control" placeholder="Ej: 12345678" required>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Contraseña:</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fas fa-lock"></i></span>
-          <input type="password" name="password" class="form-control" minlength="6" required>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-    </form>
-  </div>
-</div>
+    <div class="mb-3">
+      <label for="cedula" class="form-label">🆔 Cédula o RIF</label>
+      <input type="text" name="cedula" id="cedula" class="form-control" maxlength="11" required placeholder="Ej: V12345678" autocomplete="off">
+    </div>
 
+    <div class="mb-3">
+      <label for="contrasena" class="form-label">🔒 Contraseña</label>
+      <input type="password" name="contrasena" id="contrasena" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+  </form>
+
+  <?php if (isset($error)): ?>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Acceso denegado',
+        text: '<?= addslashes($error) ?>'
+      });
+    </script>
+  <?php endif; ?>
 </body>
 </html>

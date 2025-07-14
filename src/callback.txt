@@ -1,0 +1,44 @@
+<?php
+require_once 'vendor/autoload.php';
+use QuickBooksOnline\API\DataService\DataService;
+
+$dataService = DataService::Configure([
+    'auth_mode'     => 'oauth2',
+    'ClientID'      => 'AB4dLiT5xDU15Ih8F6HoFE12wuq6MfGRNJI4DLbH1ERJb4bbLB',
+    'ClientSecret'  => 'E711ETcTF4XLgrvxjBys6sD5BDer0YoijhMRceI5',
+    'RedirectURI'   => 'https://colchonesbqto-app.onrender.com/callback.php',
+	'scope' => 'com.intuit.quickbooks.accounting offline_access'
+    'baseUrl'       => 'Production']);
+
+$OAuth2LoginHelper = $dataService->getOAuth2LoginHelper();
+
+if (isset($_GET['code']) && isset($_GET['realmId'])) {
+    try {
+        $accessToken = $OAuth2LoginHelper->exchangeAuthorizationCodeForToken(
+            $_GET['code'],
+            $_GET['realmId']
+        );
+
+        $tokenData = [
+            'access_token'                => $accessToken->getAccessToken(),
+            'refresh_token'               => $accessToken->getRefreshToken(),
+            'expires_in'                  => $accessToken->getAccessTokenValidationPeriodInSeconds(),
+            'x_refresh_token_expires_in' => $accessToken->getRefreshTokenValidationPeriodInSeconds(),
+            'token_type'                  => 'bearer',
+            'realmId'                     => $_GET['realmId']
+        ];
+
+        // Guardar el token en la carpeta del proyecto
+        $tokenFile = __DIR__ . '/token.json';
+        file_put_contents($tokenFile, json_encode($tokenData, JSON_PRETTY_PRINT));
+
+        // ✅ Redirigir al dashboard automáticamente
+        header("Location: dashboard.php");
+        exit();
+    } catch (Exception $e) {
+        echo "❌ Error al generar el token: " . $e->getMessage();
+    }
+} else {
+    echo "⚠️ No se recibió el código de autorización o el realm ID.";
+}
+?>
