@@ -1,4 +1,21 @@
 <?php
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 🔍 Diagnóstico visual temporal
+echo "<pre>";
+echo "✅ callback.php ejecutándose\n";
+
+echo "📦 Parámetros recibidos:\n";
+echo "Code: " . ($_GET['code'] ?? '❌ No recibido') . "\n";
+echo "State: " . ($_GET['state'] ?? '❌ No recibido') . "\n";
+echo "RealmID: " . ($_GET['realmId'] ?? '❌ No recibido') . "\n";
+
+echo "🧪 User ID de sesión: " . ($_SESSION['user_id'] ?? '❌ No definido') . "\n";
+echo "</pre>";
+exit;
 session_start();
 
 // ✅ Autoload del SDK de QuickBooks y tus clases

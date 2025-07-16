@@ -1,10 +1,24 @@
 <?php
-$host      = "localhost";
-$usuario   = "root";
-$clave     = "jeshua"; // Cambia si tu MySQL tiene contraseña
-$basedatos = "colchonesbqto"; // Asegúrate de que esta base exista
-$puerto    = 3307; // Si usas WAMP con puerto personalizado
+// 🌍 Detectar entorno automáticamente
+$esProduccion = isset($_SERVER['RENDER']) || getenv('RENDER');
 
+if ($esProduccion) {
+    // 🔒 Entorno Render (producción)
+    $host      = getenv("DB_HOST");
+    $usuario   = getenv("DB_USER");
+    $clave     = getenv("DB_PASS");
+    $basedatos = getenv("DB_NAME");
+    $puerto    = getenv("DB_PORT") ?: 3306;
+} else {
+    // 🧪 Entorno local (WAMP)
+    $host      = "localhost";
+    $usuario   = "root";
+    $clave     = "jeshua";
+    $basedatos = "colchonesbqto";
+    $puerto    = 3307;
+}
+
+// 🛠️ Crear conexión MySQLi
 $conn = new mysqli($host, $usuario, $clave, $basedatos, $puerto);
 
 // ⛔ Verificar conexión
@@ -12,6 +26,5 @@ if ($conn->connect_error) {
     die("❌ Error de conexión a la base de datos: " . $conn->connect_error);
 }
 
-// ✅ Opcional: configurar charset si trabajas con textos
+// ✅ Configurar charset
 $conn->set_charset("utf8");
-?>

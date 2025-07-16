@@ -1,10 +1,14 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/src/Config/conexion.php';
-$config = require __DIR__ . '/src/Config/config.php';
+require_once __DIR__ . '/../src/Config/conexion.php';
+require_once __DIR__ . '/../src/Config/config.php';
+$config = require __DIR__ . '/../src/Config/config.php';
+//$config = require __DIR__ . '/src/Config/config.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $cedula = strtoupper(trim($_POST["cedula"] ?? ''));
@@ -29,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $userId              = $fila["id"];
 
         // 🔐 Manejo del token solo después del login exitoso
-        require_once __DIR__ . '/src/Config/config.php';
+		require_once __DIR__ . '/../src/Config/config.php';
 
         $dbConfig     = $config['db'];
         $modo         = $config['modo'];
@@ -42,13 +46,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           $dbConfig['clave'],
           [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
-
-        require_once __DIR__ . '/src/servicios/token_manager.php';
+          require_once __DIR__ . '/../src/servicios/token_manager.php';
         $tokenManager = new TokenManagerDB($pdo);
 
         // 🌐 Redirigir si el token aún no existe
         if (!$tokenManager->existe($userId)) {
-		  header("Location: src/servicios/iniciar_conexion_quickbooks.php");
+		  require_once __DIR__ . '/../src/servicios/iniciar_conexion_quickbooks.php';
+		  //header("Location: src/servicios/iniciar_conexion_quickbooks.php");
           exit();
         }
 
