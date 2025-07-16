@@ -1,6 +1,4 @@
 <?php
-// autorizar.php
-
 session_start();
 require 'vendor/autoload.php';
 use QuickBooksOnline\API\DataService\DataService;

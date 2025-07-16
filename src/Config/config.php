@@ -13,7 +13,7 @@ return [
 'produccion' => [ // LIVE/QBO REAL
     'ClientID'     => 'ABCdF0BQFmcaxBa9KI9wtNRq9GbIMYbB2cWNA1UAvEa8t6hfmz',
     'ClientSecret' => 't1IRhPgphog6kZqAtH7TA3aXGAjwh8ZIpZHfQaZb',
-    'RedirectURI'  => 'https://colchonesbqto-app.onrender.com/callback.php',
+    'RedirectURI'  => 'https://colchonesbqto-app-1.onrender.com/callback.php',
     'baseUrl'      => 'Production',
 	 'campos_personalizados' => true   // 👈 Añadido
   ],
