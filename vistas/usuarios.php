@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "admin") {
+if (!isset($_SESSION["user_id"]) || $_SESSION["rol"] !== "admin") {
     header("Location: /ColchonesBqto/login.php");
     exit();
 }
@@ -132,7 +132,8 @@ function confirmarEliminacion(id, nombre) {
     cancelButtonText: 'Cancelar'
   }).then((result) => {
     if (result.isConfirmed) {
-	  window.location.href = '/ColchonesBqto/vistas/eliminar_usuario.php?id=' + id;
+		const ruta = `${window.location.origin}/ColchonesBqto/vistas/eliminar_usuario.php?id=${id}`;
+        window.location.href = ruta;
     }
   });
 }

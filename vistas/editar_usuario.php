@@ -1,8 +1,10 @@
 <?php
 session_start();
-if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "admin") {
-    header("Location: login.php");
-    exit();
+if (!isset($_SESSION["user_id"]) || $_SESSION["rol"] !== "admin") {
+	$rutaLogin = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/ColchonesBqto/login.php';
+     header("Location: $rutaLogin");
+     exit();
+   
 }
 
 $conexion = new mysqli("127.0.0.1", "root", "jeshua", "colchonesbqto", 3307);

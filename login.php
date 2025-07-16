@@ -2,7 +2,9 @@
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
 require_once __DIR__ . '/src/Config/conexion.php';
+$config = require __DIR__ . '/src/Config/config.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $cedula = strtoupper(trim($_POST["cedula"] ?? ''));
@@ -21,10 +23,36 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($resultado->num_rows === 1) {
       $fila = $resultado->fetch_assoc();
       if (password_verify($contrasena, $fila["password"])) {
-        $_SESSION["usuario"] = $fila["nombre"];
-        $_SESSION["usuario_id"] = $fila["id"];
-        $_SESSION["rol"] = $fila["rol"];
-		header("Location: vistas/dashboard.php");
+        $_SESSION["user_id"] = $fila["id"];
+		$_SESSION["nombre"]  = $fila["nombre"];
+        $_SESSION["rol"]     = $fila["rol"];
+        $userId              = $fila["id"];
+
+        // 🔐 Manejo del token solo después del login exitoso
+        require_once __DIR__ . '/src/Config/config.php';
+
+        $dbConfig     = $config['db'];
+        $modo         = $config['modo'];
+        $clientId     = $config[$modo]['ClientID'];
+        $clientSecret = $config[$modo]['ClientSecret'];
+
+        $pdo = new PDO(
+          "mysql:host={$dbConfig['host']};port={$dbConfig['puerto']};dbname={$dbConfig['basedatos']};charset=utf8",
+          $dbConfig['usuario'],
+          $dbConfig['clave'],
+          [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+
+        require_once __DIR__ . '/src/servicios/token_manager.php';
+        $tokenManager = new TokenManagerDB($pdo);
+
+        // 🌐 Redirigir si el token aún no existe
+        if (!$tokenManager->existe($userId)) {
+		  header("Location: src/servicios/iniciar_conexion_quickbooks.php");
+          exit();
+        }
+
+        header("Location: vistas/dashboard.php");
         exit;
       } else {
         $error = "Contraseña incorrecta.";

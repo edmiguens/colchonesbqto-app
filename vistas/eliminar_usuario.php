@@ -1,7 +1,8 @@
 <?php
 session_start();
-if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "admin") {
-    header("Location: login.php");
+if (!isset($_SESSION["user_id"]) || $_SESSION["rol"] !== "admin") {
+	$rutaLogin = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/ColchonesBqto/login.php';
+    header("Location: $rutaLogin");
     exit();
 }
 
@@ -9,7 +10,7 @@ if (isset($_GET["id"])) {
     $id = intval($_GET["id"]);
 
     // Evitar que el admin se elimine a sí mismo
-    if ($_SESSION["usuario_id"] == $id) {
+    if ($_SESSION["user_id"] == $id) {
         echo "❌ No puedes eliminar tu propia cuenta.";
         exit();
     }

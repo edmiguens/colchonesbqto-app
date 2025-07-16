@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../src/Config/conexion.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $nombre     = trim($_POST['nombre'] ?? '');
+  $nombre = strtoupper(trim($_POST['nombre'] ?? ''));	
   $email      = trim($_POST['email'] ?? '');
   $tipoCedula = trim($_POST['cedula_tipo'] ?? '');
   $numCedula  = trim($_POST['cedula_numero'] ?? '');
@@ -16,14 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $cedula     = $tipoCedula . $numCedula;
 
   if ($nombre === '' || $email === '' || $cedula === '' || $contrasena === '' || $confirmar === '' || $rol === '') {
-    echo "<!DOCTYPE html><html><head><meta charset='UTF-8'>
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script></head><body>
-    <script>
-      Swal.fire({icon:'error',title:'Campos obligatorios',text:'Completa todos los campos requeridos.'})
-      .then(() => { window.location.href = 'registro.php'; });
-    </script></body></html>";
-    exit;
-  }
+  $rutaRegistro = $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['HTTP_HOST'] . "/ColchonesBqto/vistas/registro.php";
+  echo "<!DOCTYPE html><html><head><meta charset='UTF-8'>
+  <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script></head><body>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Campos obligatorios',
+      text: 'Completa todos los campos requeridos.'
+    }).then(() => {
+      window.location.href = '$rutaRegistro';
+    });
+  </script></body></html>";
+  exit;
+}
 
   if (!preg_match('/^[VEJ]\d{7,10}$/', $cedula)) {
     echo "<!DOCTYPE html><html><head><meta charset='UTF-8'>
