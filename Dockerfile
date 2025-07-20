@@ -1,34 +1,37 @@
-# Imagen base
+# 📦 Imagen base PHP + Apache
 FROM php:8.2-apache
 
-# Instalación de extensiones necesarias
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# ⚙️ Extensiones necesarias para Composer y QuickBooks SDK
+RUN docker-php-ext-install mysqli pdo pdo_mysql mbstring curl openssl
 
-# Habilita mod_rewrite (para rutas limpias)
+# 🔄 Mod Rewrite para rutas limpias
 RUN a2enmod rewrite
 
-# Copia todo tu proyecto (ajusta si usas src/)
+# 📦 Copiar código fuente al contenedor
 COPY . /var/www/html/
 
-# Asegura que Apache sirva index.php por defecto
+# 🛠 Establecer índice por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/conf-available/custom-index.conf \
     && a2enconf custom-index
 
-# Silencia el warning del ServerName
+# 🔇 Silenciar warning de ServerName
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Instalación de Composer
+# 🔐 Asignar permisos a Apache
+RUN chown -R www-data:www-data /var/www/html
+
+# 🧰 Instalar Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
  && php composer-setup.php \
  && php -r "unlink('composer-setup.php');" \
  && mv composer.phar /usr/local/bin/composer
 
-# Instalación de dependencias PHP
+# 🧰 Instalar Git para Composer
+RUN apt-get update && apt-get install -y git
+
+# 📦 Instalar dependencias PHP desde composer.json
 WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
 
-# Asigna permisos
-RUN chown -R www-data:www-data /var/www/html
-
-# Expone el puerto 80
+# 🌐 Exponer el puerto HTTP
 EXPOSE 80
