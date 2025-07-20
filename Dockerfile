@@ -1,8 +1,11 @@
-# 📦 Imagen base
+# 📦 Imagen base PHP + Apache
 FROM php:8.2-apache
 
-# 🧰 Instalar dependencias del sistema necesarias para compilar extensiones PHP
+# 🧰 Instalar herramientas de desarrollo necesarias para compilar extensiones PHP
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    autoconf \
+    pkg-config \
     libcurl4-openssl-dev \
     libssl-dev \
     libonig-dev \
@@ -26,34 +29,31 @@ RUN apt-get update && apt-get install -y \
 # 🧱 Instalar extensiones PHP requeridas
 RUN docker-php-ext-install mysqli pdo pdo_mysql mbstring curl openssl
 
-# 🔄 Habilita mod_rewrite
+# 🔄 Habilitar mod_rewrite para URLs limpias
 RUN a2enmod rewrite
 
-# 📦 Copiar proyecto
-COPY . /var/www/html/
+# 🔇 Silenciar advertencia de ServerName
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# 🛠 Configurar index por defecto
+# 🛠 Configurar index.php como principal
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/conf-available/custom-index.conf \
     && a2enconf custom-index
 
-# 🔇 Silenciar warning de ServerName
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# 📦 Copiar todo el proyecto al contenedor
+COPY . /var/www/html/
 
-# 🔐 Permisos para Apache
+# 🔐 Asignar permisos a Apache
 RUN chown -R www-data:www-data /var/www/html
 
 # 🧰 Instalar Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php composer-setup.php \
- && php -r "unlink('composer-setup.php');" \
- && mv composer.phar /usr/local/bin/composer
+    && php composer-setup.php \
+    && php -r "unlink('composer-setup.php');" \
+    && mv composer.phar /usr/local/bin/composer
 
-# 🧰 Instalar Git para Composer
-RUN apt-get install -y git
-
-# 📦 Instalar dependencias PHP del proyecto
+# 📦 Instalar dependencias PHP vía Composer
 WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
 
-# 🌐 Exponer puerto Apache
+# 🌐 Exponer puerto Apache (aunque Render lo maneja internamente)
 EXPOSE 80
