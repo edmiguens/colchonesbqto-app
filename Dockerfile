@@ -17,6 +17,16 @@ RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/conf-available/cus
 # Silencia el warning del ServerName
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+# Instalación de Composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+ && php composer-setup.php \
+ && php -r "unlink('composer-setup.php');" \
+ && mv composer.phar /usr/local/bin/composer
+
+# Instalación de dependencias PHP
+WORKDIR /var/www/html
+RUN composer install --no-dev --optimize-autoloader
+
 # Asigna permisos
 RUN chown -R www-data:www-data /var/www/html
 
