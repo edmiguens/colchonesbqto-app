@@ -1,0 +1,14 @@
+# Ignorar dependencias
+vendor/
+
+# Carpetas de respaldo local
+backup_local/
+respaldo_git/
+
+# Archivos sensibles
+.env
+
+# Archivos temporales
+*.log
+*.zip
+*.bak
